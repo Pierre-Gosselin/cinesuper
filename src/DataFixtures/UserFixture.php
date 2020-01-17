@@ -2,17 +2,14 @@
 
 namespace App\DataFixtures;
 
-use App\DataFixtures\BaseFixture;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 use App\Service\UserService;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Entity\User;
 
-/**
- * Class UserFixture
- * @package App\DataFixtures
- */
-class UserFixture extends BaseFixture
+
+class UserFixture extends Fixture
 {
     /**
      * @var UserPasswordEncoderInterface
@@ -38,20 +35,33 @@ class UserFixture extends BaseFixture
     /**
      * @param ObjectManager $manager
      */
-    protected function loadData(ObjectManager $manager)
+    public function load(ObjectManager $manager)
     {
-        $this->createMany(User::class, 1, function(User $user) {
-            $user
+  
+            $admin = new User;
+            $admin
                 ->setEmail("admin@cinesuper.com")
-                ->setPassword($this->passwordEncoder->encodePassword($user, "12345678"))
+                ->setPassword($this->passwordEncoder->encodePassword($admin, "12345678"))
                 ->setFirstName("David")
                 ->setLastName("Hasselhoff")
                 ->setEnabled(1)
                 ->setRoles(["ROLE_ADMIN"])
                 ->setBirthdate(new \Datetime('now'))
-                ->setCard($this->userService->generateCard($user));
-        });
+                ->setCard($this->userService->generateCard($admin));
 
+            $cashier = new User;
+            $cashier
+                ->setEmail("jeanine@cinesuper.com")
+                ->setPassword($this->passwordEncoder->encodePassword($cashier, "12345678"))
+                ->setFirstName("Jeanine")
+                ->setLastName("Duval")
+                ->setEnabled(1)
+                ->setRoles(["ROLE_CASHIER"])
+                ->setBirthdate(new \Datetime('now'))
+                ->setCard($this->userService->generateCard($cashier));
+
+        $manager->persist($admin);
+        $manager->persist($cashier);
         $manager->flush();
     }
 }
